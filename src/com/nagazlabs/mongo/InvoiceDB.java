@@ -6,10 +6,12 @@ import java.util.List;
 import org.bson.Document;
 
 import com.google.gson.Gson;
+import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Filters;
 import com.nagazlabs.models.Invoice;
+import com.nagazlabs.util.DBUtil;
 
 public class InvoiceDB {
 
@@ -18,7 +20,7 @@ public class InvoiceDB {
 	
 	public boolean addInvoice(Invoice invoice) {
 		try {
-			InsertHandler.insert(invoice, coll);
+			DBUtil.insert(invoice, coll);
 			return true;
 		} catch (Exception e) {
 			System.out.println("Error creating invoice");
@@ -51,6 +53,18 @@ public class InvoiceDB {
 			System.out.println("error retrieving user's invoices");
 		}
 		return null;
+	}
+	
+	public int getMaxId() {
+		try {
+			MongoCursor<Document> cur = coll.find().sort(new BasicDBObject("id", -1)).limit(1).iterator();
+			while(cur.hasNext()) {
+				return (int) cur.next().get("id");
+			}
+		} catch (Exception e) {
+			
+		}
+		return 0;
 	}
 	
 	public boolean updateInvoice(Invoice invoice) {

@@ -1,5 +1,8 @@
 package com.nagazlabs.mongo;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.bson.Document;
 
 import com.mongodb.MongoClient;
@@ -11,6 +14,12 @@ public class Connection {
 
 	private static MongoClient mongo = new MongoClient(new MongoClientURI("mongodb://admin:admin@mycluster1-shard-00-00-shmwc.mongodb.net:27017,mycluster1-shard-00-01-shmwc.mongodb.net:27017,mycluster1-shard-00-02-shmwc.mongodb.net:27017/test?ssl=true&replicaSet=MyCluster1-shard-0&authSource=admin&retryWrites=true&w=majority"));
 	private static MongoDatabase db = mongo.getDatabase("store-front");
+	
+	static {
+		Logger mongoLogger = Logger.getLogger( "org.mongodb.driver" );
+		mongoLogger.setLevel(Level.SEVERE);
+		
+	}
 	
 	public static MongoCollection<Document> getUsersCollection() {
 		return db.getCollection("users");

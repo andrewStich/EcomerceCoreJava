@@ -3,9 +3,12 @@ package com.nagazlabs.mongo;
 import org.bson.Document;
 
 import com.google.gson.Gson;
+import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Filters;
 import com.nagazlabs.models.User;
+import com.nagazlabs.util.DBUtil;
 
 public class UserDB {
 
@@ -14,10 +17,10 @@ public class UserDB {
 	
 	public boolean addUser(User user) {
 		try {
-			InsertHandler.insert(user, coll);
+			DBUtil.insert(user, coll);
 			return true;
 		} catch (Exception e) {
-			System.out.println("error adding user");
+			//System.out.println("error adding user");
 		}
 		 return false;
 	}
@@ -28,7 +31,30 @@ public class UserDB {
 			User user = gson.fromJson(userDoc.toJson(), User.class);
 			return user;
 		} catch (Exception e) {
-			System.out.println("Error retrieving user");
+			//System.out.println("Error retrieving user");
+		}
+		return null;
+	}
+	
+	public int getMaxId() {
+		try {
+			MongoCursor<Document> cur = coll.find().sort(new BasicDBObject("id", -1)).limit(1).iterator();
+			while(cur.hasNext()) {
+				return (int) cur.next().get("id");
+			}
+		} catch (Exception e) {
+			
+		}
+		return 0;
+	}
+	
+	public User getUserByUserName(String uname) {
+		try {
+			Document userDoc = coll.find(Filters.eq("userName", uname)).first();
+			User user = gson.fromJson(userDoc.toJson(), User.class);
+			return user;
+		} catch (Exception e) {
+			//System.out.println("Error retrieving user");
 		}
 		return null;
 	}
@@ -39,7 +65,7 @@ public class UserDB {
 			User user = gson.fromJson(userDoc.toJson(), User.class);
 			return user;
 		} catch (Exception e) {
-			System.out.println("Error retrieving user");
+			//System.out.println("Error retrieving user");
 		}
 		return null;
 	}
@@ -49,7 +75,7 @@ public class UserDB {
 			coll.deleteOne(Filters.eq("id", id));
 			return true;
 		} catch (Exception e) {
-			System.out.println("Error deleting user");
+			//System.out.println("Error deleting user");
 		}
 		return false;
 	}

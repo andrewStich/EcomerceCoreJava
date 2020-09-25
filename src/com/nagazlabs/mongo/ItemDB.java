@@ -1,11 +1,17 @@
 package com.nagazlabs.mongo;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bson.Document;
 
 import com.google.gson.Gson;
+import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Filters;
 import com.nagazlabs.models.Item;
+import com.nagazlabs.util.DBUtil;
 
 public class ItemDB {
 
@@ -14,12 +20,27 @@ public class ItemDB {
 	
 	public boolean addItem(Item item) {
 		try {
-			InsertHandler.insert(item, coll);
+			DBUtil.insert(item, coll);
 			return true;
 		} catch (Exception e) {
-			System.out.println("error adding item");
+			//System.out.println("error adding item");
 		}
 		return false;
+	}
+	
+	public List<Item> getAllItems() {
+		List<Item> items = new ArrayList<Item>();
+		try {
+			MongoCursor<Document> cur = coll.find().cursor();
+			while(cur.hasNext()) {
+				Item item = gson.fromJson(cur.next().toJson(), Item.class);
+				items.add(item);
+			}
+			return items;
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		return null;
 	}
 	
 	public Item getItemByItemCode(String code) {
@@ -31,6 +52,18 @@ public class ItemDB {
 			System.out.println("error retrieving item");
 		}
 		return null;
+	}
+	
+	public int getMaxId() {
+		try {
+			MongoCursor<Document> cur = coll.find().sort(new BasicDBObject("id", -1)).limit(1).iterator();
+			while(cur.hasNext()) {
+				return (int) cur.next().get("id");
+			}
+		} catch (Exception e) {
+			
+		}
+		return 0;
 	}
 	
 	public boolean updateItem(Item item) {
